@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+:root {
+  --brand: #9a3412;
+}
+
+@theme inline {
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --color-ink: #1c1612;
+  --color-cream: #f3eee6;
+  --color-card: #fffdf8;
+  --color-line: #e5d9cb;
+  --color-clay: var(--brand);
+  --color-moss: #3f6212;
+  --color-muted: #6f6258;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+}
+
+input, select, textarea, button {
+  font: inherit;
+}
+
+.console {
+  --color-ink: #1f2937;
+  --color-cream: #f3faf6;
+  --color-card: #ffffff;
+  --color-line: #e3eee7;
+  --brand: #16803c;
+  --color-clay: #16803c;
+  --color-moss: #15803d;
+  --color-muted: #6b7280;
+  --font-serif: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  background: #f3faf6;
+  color: #1f2937;
+  min-height: 100vh;
+}
+
+.console h1.font-serif {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.console .data-card:has(table) {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.console .data-card:has(table) > :not(table):not(.overflow-x-auto) {
+  padding: 1.25rem 1.25rem 0;
+}
+
+.console .data-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.console .data-card thead tr {
+  background: #16803c;
+}
+
+.console .data-card thead th {
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 0.9rem 1rem !important;
+}
+
+.console .data-card tbody td {
+  padding: 0.9rem 1rem;
+  border-top: 1px solid var(--color-line);
+  vertical-align: middle;
+}
+
+.console .data-card tbody tr:hover {
+  background: #f8fafc;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.sheet-up {
+  animation: sheet-up 0.22s ease-out;
+}
+
+.auth-screen {
+  --brand: #16803c;
+  --color-clay: #16803c;
+}
+
+.auth-screen button[class*="bg-clay"] {
+  background-color: #16803c;
+}
+
+.auth-screen button[class*="bg-clay"]:hover {
+  background-color: #146c34;
+}
+
+.auth-screen a.text-clay {
+  color: #16803c;
+}
+
+.auth-orb {
+  animation: auth-drift 9s ease-in-out infinite;
+}
+
+.auth-card {
+  animation: auth-rise 0.55s ease-out;
+}
+
+@keyframes auth-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(18px, -28px, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes auth-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-orb,
+  .auth-card {
+    animation: none;
+  }
+}
