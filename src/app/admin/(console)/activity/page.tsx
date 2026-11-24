@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/components/admin-shell";
-import { Card, Empty, Modal, Spinner, initials } from "@/components/ui";
+import { Card, Empty, ListFilters, Modal, Spinner, initials } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/format";
 
@@ -112,6 +112,9 @@ export default function ActivityPage() {
   const { token, property } = useAdmin();
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [open, setOpen] = useState<LogRow | null>(null);
+  const [draft, setDraft] = useState("");
+  const [q, setQ] = useState("");
+  const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -122,11 +125,16 @@ export default function ActivityPage() {
       .finally(() => setLoading(false));
   }, [token, property.id]);
 
-  if (loading) return <Spinner label="Loading activity" />;
-  if (error) return <p className="text-sm text-red-800">{error}</p>;
+  const shown = logs.filter((log) => {
+    const actor = log.actor?.full_name || log.actor?.email || "";
+    const type = activityType(log);
+    if (status && type !== status) return false;
+    if (q && !`${actor} ${log.summary} ${type}`.toLowerCase().includes(q.toLowerCase())) return false;
+    return true;
+  });
 
   const groups: Array<{ label: string; items: LogRow[] }> = [];
-  for (const log of logs) {
+  for (const log of shown) {
     const key = dayKey(log.created_at);
     const current = groups[groups.length - 1];
     if (current && dayKey(current.items[0].created_at) === key) current.items.push(log);
@@ -141,11 +149,29 @@ export default function ActivityPage() {
           <p className="mt-1 text-sm text-muted">What was added or changed at {property.name} during the last year.</p>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#16803c] shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
-          {logs.length} {logs.length === 1 ? "event" : "events"}
+          {shown.length} {shown.length === 1 ? "event" : "events"}
         </span>
       </div>
-      {logs.length === 0 ? (
-        <Empty title="No activity yet" body="Property, room, booking, and user changes from the last 12 months show up here." />
+      <ListFilters
+        query={draft}
+        onQueryChange={setDraft}
+        onSearch={() => setQ(draft.trim())}
+        placeholder="Search person or change"
+        status={status}
+        onStatusChange={setStatus}
+        statusLabel="Type"
+        statuses={[
+          { value: "Create", label: "Create" },
+          { value: "Update", label: "Update" },
+          { value: "Delete", label: "Delete" },
+          { value: "Cancel", label: "Cancel" },
+        ]}
+      />
+      {error && <p className="text-sm text-red-800">{error}</p>}
+      {loading ? (
+        <Spinner label="Loading activity" />
+      ) : shown.length === 0 ? (
+        <Empty title="No activity yet" body={q || status ? "Nothing matches this search." : "Property, room, booking, and user changes from the last 12 months show up here."} />
       ) : (
         <div className="grid gap-5">
           {groups.map((group) => (

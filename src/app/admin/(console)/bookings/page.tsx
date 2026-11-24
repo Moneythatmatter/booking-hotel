@@ -87,7 +87,15 @@ export default function BookingsPage() {
         }}
       >
         <Field label="Search" value={q} onChange={(event) => setQ(event.target.value)} placeholder="Name, email, or code" />
-        <Select label="Status" value={status} onChange={(event) => setStatus(event.target.value)}>
+        <Select
+          label="Status"
+          value={status}
+          onChange={(event) => {
+            const next = event.target.value;
+            setStatus(next);
+            load(next, q).catch((loadError) => setError(errorMessage(loadError)));
+          }}
+        >
           <option value="">All</option>
           {["pending", "confirmed", "checked_in", "checked_out", "cancelled", "no_show"].map((item) => (
             <option key={item} value={item}>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/components/admin-shell";
-import { Banner, Button, Card, Empty, Field, Modal, Spinner, TextArea } from "@/components/ui";
+import { Banner, Button, Card, Empty, Field, ListFilters, Modal, Spinner, TextArea } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage, money } from "@/lib/format";
 
@@ -20,6 +20,9 @@ const blank: Extra = { name: "", description: "", price: 500, charge: "per_night
 export default function ExtrasPage() {
   const { token, property } = useAdmin();
   const [rows, setRows] = useState<Extra[]>([]);
+  const [draft, setDraft] = useState("");
+  const [q, setQ] = useState("");
+  const [status, setStatus] = useState("");
   const [form, setForm] = useState<Extra>(blank);
   const [editing, setEditing] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -66,7 +69,12 @@ export default function ExtrasPage() {
     }
   }
 
-  if (loading) return <Spinner />;
+  const shown = rows.filter((row) => {
+    if (q && !`${row.name} ${row.description}`.toLowerCase().includes(q.toLowerCase())) return false;
+    if (status === "active" && !row.is_active) return false;
+    if (status === "hidden" && row.is_active) return false;
+    return true;
+  });
 
   return (
     <div className="grid gap-6">
@@ -88,6 +96,18 @@ export default function ExtrasPage() {
         </Button>
       </div>
       {!open && error && <Banner>{error}</Banner>}
+      <ListFilters
+        query={draft}
+        onQueryChange={setDraft}
+        onSearch={() => setQ(draft.trim())}
+        placeholder="Search extras"
+        status={status}
+        onStatusChange={setStatus}
+        statuses={[
+          { value: "active", label: "Active" },
+          { value: "hidden", label: "Hidden" },
+        ]}
+      />
       <Modal open={open} title={editing == null ? "Add extra" : "Edit extra"} onClose={() => setOpen(false)}>
         <form onSubmit={save} className="grid gap-4">
           {error && <Banner>{error}</Banner>}
@@ -110,11 +130,15 @@ export default function ExtrasPage() {
           <Button className="w-full" disabled={pending}>{pending ? "Saving…" : "Save"}</Button>
         </form>
       </Modal>
-      {rows.length === 0 ? (
-        <Empty title="No extras yet" body="Add an extra bed, breakfast, or airport pickup for guests to add during booking." />
+      {loading ? (
+        <Spinner />
+      ) : shown.length === 0 ? (
+        <Empty title="No extras yet" body={q || status ? "Nothing matches this search." : "Add an extra bed, breakfast, or airport pickup for guests to add during booking."} />
       ) : (
         <div className="grid gap-3">
-          {rows.map((row, index) => (
+          {shown.map((row) => {
+            const index = rows.indexOf(row);
+            return (
             <Card key={row.id || row.name} className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
               <div>
                 <p className="font-medium">{row.name}</p>
@@ -128,7 +152,8 @@ export default function ExtrasPage() {
                 <Button variant="danger" onClick={() => remove(index)}>Delete</Button>
               </div>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

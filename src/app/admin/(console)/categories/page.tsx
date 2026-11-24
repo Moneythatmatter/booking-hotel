@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/components/admin-shell";
 import { RoomCategoryCard } from "@/components/room-category-card";
-import { Banner, Button, Empty, Field, Modal, Select, Spinner, TextArea } from "@/components/ui";
+import { Banner, Button, Empty, Field, ListFilters, Modal, Select, Spinner, TextArea } from "@/components/ui";
 import { readLandscape } from "@/lib/image";
 import { api } from "@/lib/api";
 import { errorMessage, money } from "@/lib/format";
@@ -48,6 +48,9 @@ const blank = {
 export default function CategoriesPage() {
   const { token, property } = useAdmin();
   const [rows, setRows] = useState<Category[]>([]);
+  const [draft, setDraft] = useState("");
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [form, setForm] = useState(blank);
   const [editing, setEditing] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -139,7 +142,12 @@ export default function CategoriesPage() {
     }
   }
 
-  if (loading) return <Spinner />;
+  const shown = rows.filter((row) => {
+    if (q && !`${row.name} ${row.description}`.toLowerCase().includes(q.toLowerCase())) return false;
+    if (statusFilter === "active" && !row.is_active) return false;
+    if (statusFilter === "inactive" && row.is_active) return false;
+    return true;
+  });
 
   return (
     <div className="grid gap-6">
@@ -161,6 +169,18 @@ export default function CategoriesPage() {
         </Button>
       </div>
       {!open && error && <Banner>{error}</Banner>}
+      <ListFilters
+        query={draft}
+        onQueryChange={setDraft}
+        onSearch={() => setQ(draft.trim())}
+        placeholder="Search room category"
+        status={statusFilter}
+        onStatusChange={setStatusFilter}
+        statuses={[
+          { value: "active", label: "Active" },
+          { value: "inactive", label: "Inactive" },
+        ]}
+      />
       <Modal open={open} title={editing ? "Edit category" : "Add category"} onClose={() => setOpen(false)}>
         <form onSubmit={save} className="grid gap-4">
           {error && <Banner>{error}</Banner>}
@@ -210,11 +230,13 @@ export default function CategoriesPage() {
           </Button>
         </form>
       </Modal>
-      {rows.length === 0 ? (
-        <Empty title="No categories yet" body="Add a room type such as Deluxe or Suite, including the photo, price, and how many you have." />
+      {loading ? (
+        <Spinner />
+      ) : shown.length === 0 ? (
+        <Empty title="No categories yet" body={q || statusFilter ? "Nothing matches this search." : "Add a room type such as Deluxe or Suite, including the photo, price, and how many you have."} />
       ) : (
         <div className="grid gap-3">
-          {rows.map((row) => {
+          {shown.map((row) => {
             const price = Number(row.base_price);
             const save = row.original_price && row.original_price > price ? Math.round((1 - price / row.original_price) * 100) : 0;
             return (

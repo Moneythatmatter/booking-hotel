@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/components/admin-shell";
-import { Banner, Button, Card, Empty, Field, Modal, Spinner } from "@/components/ui";
+import { Banner, Button, Card, Empty, Field, ListFilters, Modal, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/format";
 
@@ -37,6 +37,9 @@ const blank = () => Object.fromEntries(pages.map(([key]) => [key, "none"])) as A
 export default function UsersPage() {
   const { token, property } = useAdmin();
   const [users, setUsers] = useState<Member[]>([]);
+  const [draft, setDraft] = useState("");
+  const [q, setQ] = useState("");
+  const [role, setRole] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -101,9 +104,12 @@ export default function UsersPage() {
     }
   }
 
-  const staff = users.filter((member) => member.role !== "owner");
-
-  if (loading) return <Spinner label="Loading users" />;
+  const staff = users.filter((member) => member.role !== "owner").filter((member) => {
+    const text = `${member.user?.full_name ?? ""} ${member.user?.email ?? ""}`.toLowerCase();
+    if (q && !text.includes(q.toLowerCase())) return false;
+    if (role && member.access_role !== role) return false;
+    return true;
+  });
 
   return (
     <div className="grid gap-6">
@@ -115,8 +121,23 @@ export default function UsersPage() {
         {canWrite && <Button type="button" onClick={openCreate}>Add user</Button>}
       </div>
       {!open && error && <Banner>{error}</Banner>}
-      {staff.length === 0 ? (
-        <Empty title="No users yet" body="Add someone who should work on this hotel." />
+      <ListFilters
+        query={draft}
+        onQueryChange={setDraft}
+        onSearch={() => setQ(draft.trim())}
+        placeholder="Search name or email"
+        status={role}
+        onStatusChange={setRole}
+        statusLabel="Role"
+        statuses={[
+          { value: "administrator", label: "Administrator" },
+          { value: "user", label: "User" },
+        ]}
+      />
+      {loading ? (
+        <Spinner label="Loading users" />
+      ) : staff.length === 0 ? (
+        <Empty title="No users yet" body={q || role ? "Nothing matches this search." : "Add someone who should work on this hotel."} />
       ) : (
         <Card>
           <ul>

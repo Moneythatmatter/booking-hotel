@@ -53,6 +53,61 @@ export function TextArea({ label, ...props }: TextareaHTMLAttributes<HTMLTextAre
   );
 }
 
+export function ListFilters({
+  query,
+  onQueryChange,
+  onSearch,
+  placeholder,
+  status,
+  onStatusChange,
+  statuses,
+  statusLabel = "Status",
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+  onSearch: () => void;
+  placeholder: string;
+  status?: string;
+  onStatusChange?: (value: string) => void;
+  statuses?: Array<{ value: string; label: string }>;
+  statusLabel?: string;
+}) {
+  return (
+    <form
+      className="flex flex-wrap items-center gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSearch();
+      }}
+    >
+      <input
+        className="min-w-[220px] flex-1 rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-clay focus:ring-2 focus:ring-clay/20"
+        placeholder={placeholder}
+        value={query}
+        onChange={(event) => onQueryChange(event.target.value)}
+      />
+      {statuses && onStatusChange && (
+        <select
+          className="rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-clay"
+          aria-label={statusLabel}
+          value={status ?? ""}
+          onChange={(event) => onStatusChange(event.target.value)}
+        >
+          <option value="">All {statusLabel.toLowerCase()}</option>
+          {statuses.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      )}
+      <Button type="submit" variant="ghost">
+        Search
+      </Button>
+    </form>
+  );
+}
+
 export function Banner({ children, tone = "error" }: { children: ReactNode; tone?: "error" | "ok" | "info" }) {
   const styles = {
     error: "border-red-200 bg-red-50 text-red-900",

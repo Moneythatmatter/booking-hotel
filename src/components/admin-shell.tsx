@@ -74,7 +74,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [token, setToken] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [properties, setProperties] = useState<PropertyAccess[]>([]);
@@ -107,10 +106,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         setToken(sessionToken);
         await load(sessionToken);
         if (active) setLoading(false);
-      } catch (loadError) {
+      } catch {
         if (!active) return;
-        setError(errorMessage(loadError));
-        setLoading(false);
+        try {
+          await createClient().auth.signOut();
+        } catch {
+          // The session cannot be used.
+        }
+        router.replace("/admin/login");
       }
     })();
     return () => {
@@ -135,18 +138,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     router.replace("/admin/login");
   }
 
-  if (loading) {
+  if (loading || !token || !profile) {
     return (
       <div className="grid min-h-screen place-items-center">
         <Spinner label="Opening your hotel desk" />
-      </div>
-    );
-  }
-
-  if (error || !token || !profile) {
-    return (
-      <div className="mx-auto grid min-h-screen max-w-lg place-items-center p-6">
-        <Banner>{error || "Sign in to continue."}</Banner>
       </div>
     );
   }
