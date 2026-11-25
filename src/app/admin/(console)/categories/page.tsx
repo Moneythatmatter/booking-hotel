@@ -154,7 +154,7 @@ export default function CategoriesPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Room categories</h1>
-          <p className="mt-1 text-sm text-muted">The room types guests see and book. Set how many of each type you have.</p>
+          <p className="mt-1 text-sm text-muted">The room types guests see and book. Selling price here is what guests pay unless you add a dated rate on Pricing or a nightly override on Availability.</p>
         </div>
         <Button
           type="button"

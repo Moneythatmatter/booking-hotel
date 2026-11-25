@@ -83,7 +83,7 @@ export default function PricingPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Pricing</h1>
-          <p className="mt-1 text-sm text-muted">Dated rates override the category base price. A nightly inventory override still wins.</p>
+          <p className="mt-1 text-sm text-muted">Selling price on each room category is the default. Add a rate here only when you need a dated override. Availability can still set a price per night.</p>
         </div>
         <Button type="button" disabled={categories.length === 0} onClick={() => { setError(""); setOpen(true); }}>
           Add rate
@@ -105,8 +105,8 @@ export default function PricingPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Price" type="number" min={0} step="0.01" value={form.price} onChange={(event) => setForm({ ...form, price: Number(event.target.value) })} />
             <Field label="Minimum nights" type="number" min={1} value={form.min_stay} onChange={(event) => setForm({ ...form, min_stay: Number(event.target.value) })} />
-            <Field label="Start" type="date" value={form.start_date} onChange={(event) => setForm({ ...form, start_date: event.target.value })} />
-            <Field label="End" type="date" value={form.end_date} onChange={(event) => setForm({ ...form, end_date: event.target.value })} />
+            <Field label="Start (required if no end)" type="date" value={form.start_date} onChange={(event) => setForm({ ...form, start_date: event.target.value })} />
+            <Field label="End (required if no start)" type="date" value={form.end_date} onChange={(event) => setForm({ ...form, end_date: event.target.value })} />
           </div>
           <Button className="w-full" disabled={pending}>
             {pending ? "Saving…" : "Save"}
@@ -134,7 +134,13 @@ export default function PricingPage() {
                     <p className="text-xs text-muted">{rate.category?.name}</p>
                   </td>
                   <td>
-                    {rate.start_date || "Any"} → {rate.end_date || "Any"} · min {rate.min_stay}
+                    {!rate.start_date && !rate.end_date ? (
+                      <span className="text-amber-800">No dates — not applied (category price is used). Add dates or delete.</span>
+                    ) : (
+                      <>
+                        {rate.start_date || "Open"} → {rate.end_date || "Open"} · min {rate.min_stay}
+                      </>
+                    )}
                   </td>
                   <td>{money(rate.price, property.currency)}</td>
                   <td className="text-right">
