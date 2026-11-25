@@ -206,7 +206,14 @@ export default function CategoriesPage() {
             {form.image && <img src={form.image} alt="" className="mt-3 h-28 w-full rounded-xl object-cover" />}
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Selling price / night" type="number" min={0} step="0.01" value={form.base_price} onChange={(event) => setForm({ ...form, base_price: Number(event.target.value) })} />
+            <Field
+              label="Default selling price / night"
+              type="number"
+              min={0}
+              step="0.01"
+              value={form.base_price}
+              onChange={(event) => setForm({ ...form, base_price: Number(event.target.value) })}
+            />
             <Field label="Original price / night" type="number" min={0} step="0.01" value={form.original_price} onChange={(event) => setForm({ ...form, original_price: event.target.value === "" ? "" : Number(event.target.value) })} />
             <Field label="How many rooms" type="number" min={1} value={form.room_count} onChange={(event) => setForm({ ...form, room_count: Number(event.target.value) })} />
             <Field label="Max guests" type="number" min={1} value={form.max_occupancy} onChange={(event) => setForm({ ...form, max_occupancy: Number(event.target.value) })} />
@@ -254,6 +261,7 @@ export default function CategoriesPage() {
                 originalPrice={row.original_price}
                 price={price}
                 currency={property.currency}
+                priceUnitLabel="Default price"
                 refundable={row.refundable}
                 savePercent={save}
                 badge={`${row.room_count || 0} room${row.room_count === 1 ? "" : "s"}`}

@@ -22,6 +22,7 @@ export function RoomCategoryCard({
   badge,
   badgeTone = "alert",
   caption,
+  priceUnitLabel,
   unavailable,
   action,
   onEdit,
@@ -44,6 +45,7 @@ export function RoomCategoryCard({
   badge?: string;
   badgeTone?: "alert" | "plain";
   caption?: string;
+  priceUnitLabel?: string;
   unavailable?: string;
   action?: ReactNode;
   onEdit?: () => void;
@@ -107,7 +109,11 @@ export function RoomCategoryCard({
           </div>
           <div className={`flex h-full w-full flex-col items-end gap-4 ${onEdit ? "pt-12" : "justify-between"}`}>
             <div className="w-full text-right">
-              {nights ? <p className="text-xs text-slate-400">{nights} night{nights === 1 ? "" : "s"}</p> : <p className="text-xs text-slate-400">per night</p>}
+              {nights ? (
+                <p className="text-xs text-slate-400">{nights} night{nights === 1 ? "" : "s"}</p>
+              ) : (
+                <p className="text-xs text-slate-400">{priceUnitLabel || "per night"}</p>
+              )}
               {showOriginal && <p className="text-sm text-slate-400 line-through">{money(originalPrice, currency)}</p>}
               <p className="text-2xl font-bold text-slate-900">{money(price, currency)}</p>
               {caption && <p className="text-xs text-slate-400">{caption}</p>}

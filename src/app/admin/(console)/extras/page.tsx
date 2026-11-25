@@ -59,8 +59,8 @@ export default function ExtrasPage() {
     }
   }
 
-  async function remove(index: number) {
-    if (!window.confirm("Delete this extra?")) return;
+  async function remove(row: Extra, index: number) {
+    if (!window.confirm(`Delete extra "${row.name}"? This cannot be undone.`)) return;
     setError("");
     try {
       await persist(rows.filter((_, item) => item !== index));
@@ -147,15 +147,51 @@ export default function ExtrasPage() {
                 </p>
                 {row.description && <p className="mt-1 text-sm text-muted">{row.description}</p>}
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" onClick={() => { setEditing(index); setForm(row); setError(""); setOpen(true); }}>Edit</Button>
-                <Button variant="danger" onClick={() => remove(index)}>Delete</Button>
-              </div>
+              <span className="flex shrink-0 gap-2">
+                <button
+                  type="button"
+                  aria-label={`Edit ${row.name}`}
+                  className="grid h-9 w-9 place-items-center rounded-xl border border-line bg-white text-clay hover:bg-cream"
+                  onClick={() => {
+                    setEditing(index);
+                    setForm(row);
+                    setError("");
+                    setOpen(true);
+                  }}
+                >
+                  <PencilIcon />
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Delete ${row.name}`}
+                  className="grid h-9 w-9 place-items-center rounded-xl border border-red-200 bg-white text-red-800 hover:bg-red-50"
+                  onClick={() => remove(row, index)}
+                >
+                  <TrashIcon />
+                </button>
+              </span>
             </Card>
             );
           })}
         </div>
       )}
     </div>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M4 20h4l10-10-4-4L4 16v4z" />
+      <path d="M13 7l4 4" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M4 7h16M9 7V5h6v2M10 11v6M14 11v6M6 7l1 14h10l1-14" />
+    </svg>
   );
 }
